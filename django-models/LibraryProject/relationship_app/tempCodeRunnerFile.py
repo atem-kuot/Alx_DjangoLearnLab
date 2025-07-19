@@ -18,4 +18,3 @@ def librarian_of_library(library_name):
     librarian = Librarian.objects.get(library=library)
     return librarian.library
 
-books_in_library("Central Library")
