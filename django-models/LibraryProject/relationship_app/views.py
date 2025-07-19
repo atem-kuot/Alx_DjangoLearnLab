@@ -5,7 +5,7 @@ from django.views.generic.detail import DetailView
 
 def list_books(request):
     """Function-based view to list all books."""
-    books = Book.objects.select_related('author').all()
+    books = Book.objects.all()
     return render(request, 'relationship_app/list_books.html', {'books': books})
 
 class LibraryDetailView(DetailView):
