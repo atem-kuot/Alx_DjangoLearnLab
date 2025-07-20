@@ -1,5 +1,5 @@
-
 # relationship_app/urls.py
+
 from django.urls import path
 from . import views
 from .views import list_books, LibraryDetailView, admin_view, librarian_view, member_view,RegisterView, UserLoginView, UserLogoutView
