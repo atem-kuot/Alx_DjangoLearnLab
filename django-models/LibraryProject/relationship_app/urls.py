@@ -22,8 +22,8 @@ urlpatterns = [
     path('member-only/', member_view, name='member_view'),
 
 
-    path('books/add/', book_views.add_book, name='add_book'),
-    path('books/<int:pk>/edit/', book_views.edit_book, name='edit_book'),
-    path('books/<int:pk>/delete/', book_views.delete_book, name='delete_book'),
+    path('add_book/', book_views.add_book, name='add_book'),
+    path('edit_book/', book_views.edit_book, name='edit_book'),
+    path('delete_book/', book_views.delete_book, name='delete_book'),
 ]
 
