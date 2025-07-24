@@ -13,7 +13,6 @@ class Author(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=200)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    library = models.ForeignKey("Library", on_delete=models.CASCADE)
 
 
     class Meta:
