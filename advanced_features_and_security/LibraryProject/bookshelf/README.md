@@ -1,13 +1,17 @@
-## Groups & Permissions Setup
+## User Roles & Permissions Setup
 
-This application uses Django’s built-in groups and permissions to manage access to articles.
+This app uses Django's group and permission system to manage access to the `Book` model.
 
-### Groups:
-- Viewers: can_view
-- Editors: can_view, can_create, can_edit
-- Admins: All permissions including can_delete
+### Custom Permissions (in Book model):
+- `can_view`: Can view book list
+- `can_create`: Can create a new book
+- `can_edit`: Can edit an existing book
+- `can_delete`: Can delete a book
 
-### Permissions are enforced in views using:
-@permission_required('news_app.can_<action>', raise_exception=True)
+### User Groups:
+- **Viewers**: can_view
+- **Editors**: can_create, can_edit
+- **Admins**: All permissions
 
-Assign users to groups in Django admin to grant appropriate access.
+To set up the groups and permissions automatically, run:
+
