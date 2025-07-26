@@ -1,37 +1,37 @@
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Article
-from .forms import ArticleForm
+from .models import Book
+from .forms import BookForm  # Assume you have a form
 
-@permission_required('news_app.can_view', raise_exception=True)
-def article_list(request):
-    articles = Article.objects.all()
-    return render(request, 'news_app/article_list.html', {'articles': articles})
+@permission_required('bookshelf.can_view', raise_exception=True)
+def book_list(request):
+    books = Book.objects.all()
+    return render(request, 'bookshelf/book_list.html', {'books': books})
 
-@permission_required('news_app.can_create', raise_exception=True)
-def article_create(request):
+@permission_required('bookshelf.can_create', raise_exception=True)
+def book_create(request):
     if request.method == 'POST':
-        form = ArticleForm(request.POST)
+        form = BookForm(request.POST)
         if form.is_valid():
-            article = form.save(commit=False)
-            article.author = request.user
-            article.save()
-            return redirect('article_list')
+            form.save()
+            return redirect('book_list')
     else:
-        form = ArticleForm()
-    return render(request, 'news_app/article_form.html', {'form': form})
+        form = BookForm()
+    return render(request, 'bookshelf/book_form.html', {'form': form})
 
-@permission_required('news_app.can_edit', raise_exception=True)
-def article_edit(request, pk):
-    article = get_object_or_404(Article, pk=pk)
-    form = ArticleForm(request.POST or None, instance=article)
+@permission_required('bookshelf.can_edit', raise_exception=True)
+def book_edit(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    form = BookForm(request.POST or None, instance=book)
     if form.is_valid():
         form.save()
-        return redirect('article_list')
-    return render(request, 'news_app/article_form.html', {'form': form})
+        return redirect('book_list')
+    return render(request, 'bookshelf/book_form.html', {'form': form})
 
-@permission_required('news_app.can_delete', raise_exception=True)
-def article_delete(request, pk):
-    article = get_object_or_404(Article, pk=pk)
-    article.delete()
-    return redirect('article_list')
+@permission_required('bookshelf.can_delete', raise_exception=True)
+def book_delete(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        book.delete()
+        return redirect('book_list')
+    return render(request, 'bookshelf/book_confirm_delete.html', {'book': book})
