@@ -35,3 +35,19 @@ def book_delete(request, pk):
         book.delete()
         return redirect('book_list')
     return render(request, 'bookshelf/book_confirm_delete.html', {'book': book})
+
+
+class BookSearchForm(forms.Form):
+    query = forms.CharField(max_length=100, required=True)
+
+
+
+def search_books(request):
+    form = BookSearchForm(request.GET or None)
+    results = []
+    
+    if form.is_valid():
+        query = form.cleaned_data['query']
+        results = Book.objects.filter(title__icontains=query)
+
+    return render(request, 'search_books.html', {'form': form, 'results': results})
