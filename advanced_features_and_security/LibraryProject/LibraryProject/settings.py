@@ -29,6 +29,8 @@ DEBUG = False
 
 # Enforce HTTPS redirection
 SECURE_SSL_REDIRECT = True  # Redirect all HTTP to HTTPS
+# Trust the X-Forwarded-Proto header from the proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # HTTP Strict Transport Security
 SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
