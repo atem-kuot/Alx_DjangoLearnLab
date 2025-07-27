@@ -48,6 +48,6 @@ def search_books(request):
     
     if form.is_valid():
         query = form.cleaned_data['query']
-        results = Book.objects.filter(title__icontains=query)
+        results = Book.objects.filter(title__icontains=query) # Use Django ORM instead of raw SQL to avoid SQL injection
 
     return render(request, 'search_books.html', {'form': form, 'results': results})
