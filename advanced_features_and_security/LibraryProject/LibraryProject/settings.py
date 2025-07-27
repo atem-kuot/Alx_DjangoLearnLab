@@ -23,7 +23,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#ltei=%6q7^#=apvxls@wbufo0*btnxn)0tx@%7ij^4+b7tw_9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False  # Turn off debug mode in production
+
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+CSRF_COOKIE_SECURE = True # CSRF_COOKIE_SECURE ensures CSRF cookie is only sent over HTTPS connections
+
+SESSION_COOKIE_SECURE = True
+
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
 ALLOWED_HOSTS = []
 
@@ -37,8 +49,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bookshelf'
     'relationship_app',  
 ]
+
+INSTALLED_APPS += ['csp'] 
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -49,6 +64,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+MIDDLEWARE += [
+    'csp.middleware.CSPMiddleware',
+]
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'", 'fonts.googleapis.com')
+CSP_SCRIPT_SRC = ("'self'", 'ajax.googleapis.com')
+CSP_FONT_SRC = ("'self'", 'fonts.gstatic.com')
 
 ROOT_URLCONF = 'LibraryProject.urls'
 
@@ -125,3 +149,4 @@ LOGIN_REDIRECT_URL = 'book_list'   # Redirect after login
 LOGOUT_REDIRECT_URL = 'login'     # Redirect after logout
 
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
+
