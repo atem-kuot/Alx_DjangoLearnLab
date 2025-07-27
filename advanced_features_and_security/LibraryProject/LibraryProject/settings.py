@@ -23,19 +23,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#ltei=%6q7^#=apvxls@wbufo0*btnxn)0tx@%7ij^4+b7tw_9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # Turn off debug mode in production
 
-SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = 'DENY'
-SECURE_CONTENT_TYPE_NOSNIFF = True
+# SECURITY: Set to False in production!
+DEBUG = False
 
-CSRF_COOKIE_SECURE = True # CSRF_COOKIE_SECURE ensures CSRF cookie is only sent over HTTPS connections
+# Enforce HTTPS redirection
+SECURE_SSL_REDIRECT = True  # Redirect all HTTP to HTTPS
 
-SESSION_COOKIE_SECURE = True
+# HTTP Strict Transport Security
+SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply to all subdomains
+SECURE_HSTS_PRELOAD = True  # Allow preloading in browsers
 
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# Secure cookies
+SESSION_COOKIE_SECURE = True  # Session cookies only sent over HTTPS
+CSRF_COOKIE_SECURE = True     # CSRF cookies only sent over HTTPS
+
+# Security headers
+X_FRAME_OPTIONS = 'DENY'  # Prevent clickjacking
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME-type sniffing
+SECURE_BROWSER_XSS_FILTER = True    # Enable browser XSS protection
+
+# Optional: Only allow requests from your domain
 
 ALLOWED_HOSTS = []
 
