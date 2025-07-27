@@ -1,4 +1,4 @@
 from django import forms
 
-class BookSearchForm(forms.Form):
-    ExampleForm = forms.CharField(max_length=100, required=True)
+class ExampleForm(forms.Form):
+    Query = forms.CharField(max_length=100, required=True)
