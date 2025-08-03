@@ -1,10 +1,10 @@
-from rest_framework import viewsets, ModelViewSet
+from rest_framework import viewsets, ModelViewSet, generics
 from .models import Book    
 from .serializers import BookSerializer
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
-class BookList (viewsets.ModelViewSet):
+class BookList ((generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
@@ -17,5 +17,6 @@ class BookViewSet(ModelViewSet):
         if self.action == 'destroy':  # DELETE method
             return [IsAdminUser()]
         return [IsAuthenticated()]
+
 
     
