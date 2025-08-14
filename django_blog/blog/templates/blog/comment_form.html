@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% if object %}Edit Comment{% else %}New Comment{% endif %}</title>
+</head>
+<body>
+  <h1>{% if object %}Edit Comment{% else %}New Comment{% endif %}</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% if object %}Save Changes{% else %}Add Comment{% endif %}</button>
+  </form>
+</body>
+</html>

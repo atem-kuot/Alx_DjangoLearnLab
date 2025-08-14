@@ -3,11 +3,14 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.views import View
-from .forms import RegistrationForm, UserUpdateForm, ProfileUpdateForm, PostForm
+from .forms import RegistrationForm, UserUpdateForm, ProfileUpdateForm, PostForm, CommentForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Post
+from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse, reverse_lazy
+from .models import Post, Comment, Tag
+from django.db.models import Q
+from .models import Post, Tag
 
 
 
@@ -58,8 +61,13 @@ class PostListView(ListView):
 # Public: view a single post
 class PostDetailView(DetailView):
     model = Post
-    template_name = "blog/post_detail.html"      # context: object or post
+    template_name = "blog/post_detail.html"
     context_object_name = "post"
+
+    def get_queryset(self):
+        return (Post.objects
+                .select_related("author")
+                .prefetch_related("tags", "comments__author"))
 
 # Authenticated: create a post (author = current user)
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -70,7 +78,18 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        self._apply_tags(form)
+        return response
+
+    def _apply_tags(self, form):
+        tags_list = form.cleaned_data.get("tags_input", [])
+        tag_objs = []
+        for name in tags_list:
+            obj, _ = Tag.objects.get_or_create(name=name)
+            tag_objs.append(obj)
+        # set many-to-many after the post is saved
+        self.object.tags.set(tag_objs)
 
 # Only author can edit
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -80,9 +99,20 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy("posts-list")
 
     def test_func(self):
-        post = self.get_object()
-        return post.author_id == self.request.user.id
+        return self.get_object().author_id == self.request.user.id
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self._apply_tags(form)
+        return response
+
+    def _apply_tags(self, form):
+        tags_list = form.cleaned_data.get("tags_input", [])
+        tag_objs = []
+        for name in tags_list:
+            obj, _ = Tag.objects.get_or_create(name=name)
+            tag_objs.append(obj)
+        self.object.tags.set(tag_objs)
 # Only author can delete
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
@@ -90,5 +120,103 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("posts-list")
 
     def test_func(self):
-        post = self.get_object()
-        return post.author_id == self.request.user.id
+        return self.get_object().author_id == self.request.user.id
+
+
+class TagPostListView(ListView):
+    """
+    List posts that contain a given tag (by slug).
+    """
+    model = Post
+    template_name = "blog/posts_by_tag.html"
+    context_object_name = "posts"
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, slug=self.kwargs["slug"])
+        return (Post.objects
+                .filter(tags=self.tag)
+                .select_related("author")
+                .prefetch_related("tags")
+                .order_by("-published_date"))
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["tag"] = self.tag
+        return ctx
+
+
+class SearchView(ListView):
+    """
+    Search posts by title, content, or tag name using ?q=...
+    """
+    model = Post
+    template_name = "blog/search_results.html"
+    context_object_name = "posts"
+
+    def get_queryset(self):
+        q = self.request.GET.get("q", "").strip()
+        base = Post.objects.select_related("author").prefetch_related("tags").order_by("-published_date")
+        if not q:
+            return base.none()
+        return base.filter(
+            Q(title__icontains=q) |
+            Q(content__icontains=q) |
+            Q(tags__name__icontains=q)
+        ).distinct()
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["query"] = self.request.GET.get("q", "").strip()
+        return ctx
+
+
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    """
+    Create a comment for a given post.
+    The form is shown on post_detail; this view just handles POST submission.
+    """
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/comment_form.html"  # rarely used; we submit from post_detail
+
+    def dispatch(self, request, *args, **kwargs):
+        self.post_obj = get_object_or_404(Post, pk=self.kwargs["post_pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.post = self.post_obj
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("posts-detail", kwargs={"pk": self.post_obj.pk})
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """
+    Edit an existing comment (only by the comment's author).
+    """
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/comment_form.html"
+
+    def test_func(self):
+        return self.get_object().author_id == self.request.user.id
+
+    def get_success_url(self):
+        return reverse("posts-detail", kwargs={"pk": self.get_object().post_id})
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """
+    Delete an existing comment (only by the comment's author).
+    """
+    model = Comment
+    template_name = "blog/comment_confirm_delete.html"
+
+    def test_func(self):
+        return self.get_object().author_id == self.request.user.id
+
+    def get_success_url(self):
+        return reverse("posts-detail", kwargs={"pk": self.get_object().post_id})

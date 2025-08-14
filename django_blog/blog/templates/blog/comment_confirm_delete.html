@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Delete Comment</title>
+</head>
+<body>
+  <h1>Delete Comment</h1>
+  <p>Are you sure you want to delete this comment?</p>
+  <blockquote>{{ object.content }}</blockquote>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete</button>
+  </form>
+  <p><a href="{% url 'posts-detail' object.post_id %}">Cancel</a></p>
+</body>
+</html>
