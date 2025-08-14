@@ -22,10 +22,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-6)eh_al)jtx(*(*dfyttp*b*u3y8s-zn)tou7k6-x72+wwhgbs'
 
+
+# Custom user model
+USER = 'django.contrib.auth.models.User'
+AUTH_USER_MODEL = 'auth.User'   
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
+PORT = 8000
+
 
 
 # Application definition
@@ -54,11 +61,12 @@ ROOT_URLCONF = 'django_blog.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',  # REQUIRED
+        'DIRS': [BASE_DIR / 'templates'],  # Optional: extra template dirs
+        'APP_DIRS': True,  # looks in each app's templates/ dir
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -121,13 +129,19 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-TEMPLATES = [
-    {
-        'DIRS': [BASE_DIR / 'templates'],
-    },
-]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "profile"
+LOGOUT_REDIRECT_URL = "login"
+
+# Media (for profile pictures)
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+

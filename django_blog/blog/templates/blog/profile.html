@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Your Profile</title>
+  <link rel="stylesheet" href="{% static 'blog/css/styles.css' %}">
+</head>
+<body>
+  <h1>Profile</h1>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset>
+      <legend>Account</legend>
+      {{ u_form.as_p }}
+    </fieldset>
+
+    <fieldset>
+      <legend>Profile</legend>
+      {{ p_form.as_p }}
+      {% if request.user.profile.profile_picture %}
+        <p>Current picture:</p>
+        <img src="{{ request.user.profile.profile_picture.url }}" alt="Profile pic" style="max-width:150px;">
+      {% endif %}
+    </fieldset>
+
+    <button type="submit">Save changes</button>
+  </form>
+
+  <p><a href="{% url 'logout' %}">Logout</a></p>
+  <p><a href="{% url 'blog-index' %}">Home</a></p>
+</body>
+</html>
