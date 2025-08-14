@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Delete Post</title>
+</head>
+<body>
+  <p><a href="{% url 'posts-detail' object.pk %}">&larr; Back to post</a></p>
+  <h1>Delete Post</h1>
+  <p>Are you sure you want to delete "<strong>{{ object.title }}</strong>"?</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete</button>
+  </form>
+</body>
+</html>

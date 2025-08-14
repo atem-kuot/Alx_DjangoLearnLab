@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ post.title }}</title>
+  <link rel="stylesheet" href="{% static 'blog/css/styles.css' %}">
+</head>
+<body>
+  <p><a href="{% url 'posts-list' %}">&larr; Back to posts</a></p>
+  <h1>{{ post.title }}</h1>
+  <div>by {{ post.author.username }} — {{ post.published_date|date:"Y-m-d H:i" }}</div>
+  <article>
+    <p>{{ post.content|linebreaks }}</p>
+  </article>
+
+  {% if user.is_authenticated and user.id == post.author_id %}
+    <p>
+      <a href="{% url 'posts-edit' post.pk %}">Edit</a> |
+      <a href="{% url 'posts-delete' post.pk %}">Delete</a>
+    </p>
+  {% endif %}
+</body>
+</html>
