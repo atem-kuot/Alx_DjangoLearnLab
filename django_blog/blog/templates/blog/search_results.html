@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Search Results</title>
+  <link rel="stylesheet" href="{% static 'blog/css/styles.css' %}">
+</head>
+<body>
+  <p><a href="{% url 'posts-list' %}">&larr; Back</a></p>
+  <h1>Search Results</h1>
+
+  <form method="get" action="{% url 'posts-search' %}" style="margin-bottom:1rem;">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search title, content, tags...">
+    <button type="submit">Search</button>
+  </form>
+
+  {% if query %}
+    <p>Query: <em>{{ query }}</em></p>
+  {% endif %}
+
+  <ul>
+    {% for post in posts %}
+      <li style="margin-bottom:1rem;">
+        <a href="{% url 'posts-detail' post.pk %}"><strong>{{ post.title }}</strong></a>
+        <div>by {{ post.author.username }} — {{ post.published_date|date:"Y-m-d H:i" }}</div>
+        {% if post.tags.all %}
+          <div>
+            Tags:
+            {% for tag in post.tags.all %}
+              <a href="{% url 'posts-by-tag' tag.slug %}">#{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <p>{{ post.content|truncatechars:150 }}</p>
+      </li>
+    {% empty %}
+      <li>No results.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
