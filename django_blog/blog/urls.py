@@ -11,10 +11,10 @@ urlpatterns = [
     path("logout/", UserLogoutView.as_view(), name="logout"),
     path("register/", RegisterView.as_view(), name="register"),
     path("profile/", profile_view, name="profile"),
-    path("posts/", PostListView.as_view(), name="posts-list"),
-    path("posts/new/", PostCreateView.as_view(), name="posts-create"),
-    path("posts/<int:pk>/", PostDetailView.as_view(), name="posts-detail"),
-    path("posts/<int:pk>/edit/", PostUpdateView.as_view(), name="posts-edit"),
-    path("posts/<int:pk>/delete/", PostDeleteView.as_view(), name="posts-delete"),
+    path("post/", PostListView.as_view(), name="posts-list"),
+    path("post/new/", PostCreateView.as_view(), name="posts-create"),
+    path("post/<int:pk>/", PostDetailView.as_view(), name="posts-detail"),
+    path("post/<int:pk>/edit/", PostUpdateView.as_view(), name="posts-edit"),
+    path("post/<int:pk>/delete/", PostDeleteView.as_view(), name="posts-delete"),
 
 ]
