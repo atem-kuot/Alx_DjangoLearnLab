@@ -123,7 +123,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.get_object().author_id == self.request.user.id
 
 
-class TagPostListView(ListView):
+class PostByTagListView(ListView):
     """
     List posts that contain a given tag (by slug).
     """
