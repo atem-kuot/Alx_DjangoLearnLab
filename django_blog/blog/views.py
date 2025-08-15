@@ -133,9 +133,7 @@ class TagPostListView(ListView):
 
     def get_queryset(self):
         self.tag = get_object_or_404(Tag, slug=self.kwargs["slug"])
-        return (Post.objects
-                .filter(tags=self.tag)
-                .select_related("author")
+        return (Post.objects.filter(tags=self.tag).select_related("author")
                 .prefetch_related("tags")
                 .order_by("-published_date"))
 
