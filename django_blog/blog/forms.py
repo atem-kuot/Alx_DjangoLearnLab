@@ -23,40 +23,18 @@ class ProfileUpdateForm(forms.ModelForm):
         fields = ("bio", "profile_picture")
 
 
-    tags_input = forms.CharField(
-        required=False,
-        help_text="Comma-separated tags, e.g. 'django, web, tips'"
-    )
-
+class PostForm(forms.ModelForm):
+    """
+    Author is set in the view; not user-editable here.
+    'tags' is provided by django-taggit and accepts comma-separated input.
+    """
     class Meta:
         model = Post
-        fields = ("title", "content", "tags_input")
+        fields = ("title", "content", "tags")
         widgets = {
             "title": forms.TextInput(attrs={"placeholder": "Post title"}),
             "content": forms.Textarea(attrs={"rows": 8, "placeholder": "Write your post..."}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Pre-populate tags_input when editing
-        if self.instance and self.instance.pk:
-            current = list(self.instance.tags.values_list("name", flat=True))
-            if current:
-                self.fields["tags_input"].initial = ", ".join(current)
-
-    def clean_tags_input(self):
-        # normalize user input (strip spaces, drop empties, de-duplicate case-insensitively)
-        raw = self.cleaned_data.get("tags_input", "")
-        parts = [p.strip() for p in raw.split(",") if p.strip()]
-        # make case-insensitive unique list but preserve original case of first occurrence
-        seen_lower = set()
-        unique = []
-        for p in parts:
-            key = p.lower()
-            if key not in seen_lower:
-                seen_lower.add(key)
-                unique.append(p)
-        return unique
 
 class CommentForm(forms.ModelForm):
     """
