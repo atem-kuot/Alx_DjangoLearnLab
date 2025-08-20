@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from accounts.serializers import RegisterSerializer, UserSerializer
+from Alx_DjangoLearnLab.social_media_api.accounts.serializers import RegisterSerializer, UserSerializer
 
 User = get_user_model()
 
