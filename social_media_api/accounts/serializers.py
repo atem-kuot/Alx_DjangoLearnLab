@@ -1,8 +1,10 @@
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 
-User = get_user_model()
+
+User = get_user_model().objects.create_user
 
 class UserSerializer(serializers.ModelSerializer):
     followers_count = serializers.IntegerField(source="followers.count", read_only=True)
@@ -16,7 +18,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password = serializers.CharField()
+    Token.objects.create = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
