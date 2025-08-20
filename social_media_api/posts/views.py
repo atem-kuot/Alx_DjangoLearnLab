@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from rest_framework import viewsets, filters
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
+from rest_framework.generics import ListAPIView
+
 
 class PostViewSet(viewsets.ModelViewSet):
     """
@@ -53,3 +55,24 @@ class CommentViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+
+class FeedView(ListAPIView):
+    """
+    GET: Personalized feed of posts by users that the current user follows.
+    Ordered by newest first. Paginated by DRF defaults.
+    """
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        # user.following is available via related_name on the M2M in accounts.User
+        followed_ids = user.following.values_list("id", flat=True)
+        return (
+            Post.objects
+            .select_related("author")
+            .filter(author_id__in=followed_ids)
+            .order_by("-created_at")
+        )

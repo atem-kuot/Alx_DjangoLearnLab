@@ -8,4 +8,6 @@ router.register(r"comments", CommentViewSet, basename="comment")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("unfollow/<int:user_id>/", UnfollowUserView.as_view(), name="unfollow-user"),
+
 ]
