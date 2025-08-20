@@ -1,12 +1,12 @@
 from django.shortcuts import render
+from rest_framework import viewsets, filters
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework import filters
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
 
-class PostViewSet(ModelViewSet):
+class PostViewSet(viewsets.ModelViewSet):
     """
     CRUD for posts.
     - Anyone can list/retrieve.
@@ -15,6 +15,7 @@ class PostViewSet(ModelViewSet):
     - Search by title/content/author username.
     - Ordering by created_at/updated_at/title.
     """
+    queryset = Post.objects.all()
     queryset = Post.objects.select_related("author").all().order_by("-created_at")
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
@@ -43,6 +44,7 @@ class CommentViewSet(ModelViewSet):
     ordering = ["-created_at"]
 
     def get_queryset(self):
+        qs = Comment.objects.all()
         qs = Comment.objects.select_related("author", "post").all().order_by("-created_at")
         post_id = self.request.query_params.get("post")
         if post_id:
