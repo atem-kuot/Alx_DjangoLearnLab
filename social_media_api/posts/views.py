@@ -70,8 +70,5 @@ class FeedView(ListAPIView):
         following_users = self.request.user.following.all()  # <-- following.all()
         # posts by followed users, newest first
         return (
-            Post.objects
-            .filter(author__in=following_users)               # <-- Post.objects.filter(author__in=following_users)
-            .select_related("author")
-            .order_by("-created_at")                          # <-- .order_by
+            Post.objects.filter(author__in=following_users).order_by("-created_at")                          # <-- .order_by
         )
