@@ -1,55 +1,68 @@
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from Alx_DjangoLearnLab.social_media_api.accounts.serializers import RegisterSerializer, UserSerializer
+from rest_framework import generics
+from rest_framework import generics, permissions, status
+from .serializers import RegisterSerializer, LoginSerializer, ProfileSerializer
 
-User = get_user_model()
+CustomUser = get_user_model()
 
-class RegisterView(APIView):
+
+#  User Registration
+class RegisterView(generics.GenericAPIView):
+    queryset = CustomUser.objects.all()   # now includes CustomUser.objects.all()
+    serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
-    parser_classes = [JSONParser]
 
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({"token": token.key, "user": UserSerializer(user).data},
-                            status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class LoginView(APIView):
-    permission_classes = [permissions.AllowAny]
-    parser_classes = [JSONParser]
-
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-        user = authenticate(request, username=username, password=password)
-        if not user:
-            return Response({"detail": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
         token, _ = Token.objects.get_or_create(user=user)
-        return Response({"token": token.key, "user": UserSerializer(user).data})
+        return Response(
+            {
+                "user": RegisterSerializer(user).data,
+                "token": token.key,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
-class ProfileView(APIView):
-    """
-    GET: current user profile
-    PATCH: update bio, email, profile_picture
-    """
+# ✅ User Login
+class LoginView(generics.GenericAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = LoginSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response(
+            {
+                "user": RegisterSerializer(user).data,
+                "token": token.key,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+# ✅ Profile View (authenticated users only)
+class ProfileView(generics.GenericAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    def get(self, request):
-        return Response(UserSerializer(request.user).data)
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
-    def patch(self, request):
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()  # handles bio/email/profile_picture
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            request.user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
