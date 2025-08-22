@@ -1,26 +1,38 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
-User = settings.AUTH_USER_MODEL
+CustomUser = get_user_model()
 
 class Notification(models.Model):
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
-    actor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications_sent")
-    verb = models.CharField(max_length=64)  # e.g., "followed you", "liked your post", "commented on your post"
+    recipient = models.ForeignKey(
+        CustomUser,
+        related_name="notifications",
+        on_delete=models.CASCADE
+    )
+    actor = models.ForeignKey(
+        CustomUser,
+        related_name="notifications_from",
+        on_delete=models.CASCADE
+    )
+    verb = models.CharField(max_length=255)  # e.g., "liked your post", "followed you"
 
-    # Generic relation to any object (Post, Comment, etc.)
-    target_content_type = models.ForeignKey(ContentType, null=True, blank=True, on_delete=models.SET_NULL)
+    # Generic relation to any target object (Post, Comment, etc.)
+    target_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     target_object_id = models.PositiveIntegerField(null=True, blank=True)
     target = GenericForeignKey("target_content_type", "target_object_id")
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    # ✅ Add timestamp field
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    # Optional: mark notifications as read/unread
     read = models.BooleanField(default=False)
 
-    class Meta:
-        ordering = ["read", "-created_at"]  # unread first, newest first
-
     def __str__(self):
-        t = f" on {self.target}" if self.target else ""
-        return f"{self.actor} {self.verb}{t} → {self.recipient}"
+        return f"Notification for {self.recipient} - {self.verb}"
