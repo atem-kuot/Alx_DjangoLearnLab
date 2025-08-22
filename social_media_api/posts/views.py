@@ -35,20 +35,15 @@ class PostViewSet(ModelViewSet):
         - Uses Like.objects.get_or_create to prevent duplicate likes
         - Creates a Notification directly via Notification.objects.create
         """
-        post = generics.get_object_or_404(Post, pk=pk)  # <-- required
-        like, created = Like.objects.get_or_create(      # <-- required
-            user=request.user,
-            post=post
-        )
+        post = generics.get_object_or_404(Post, pk=pk)  
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
         if created:
             # notify the post author (avoid self-notify)
             if post.author_id != request.user.id:
-                Notification.objects.create(            # <-- required
+                Notification.objects.create(
                     recipient=post.author,
                     actor=request.user,
-                    verb="liked your post",
-                    target=post
-                )
+                    verb="liked your post", target=post)
             return Response(LikeSerializer(like).data, status=status.HTTP_201_CREATED)
         return Response({"detail": "Already liked."}, status=status.HTTP_200_OK)
 
