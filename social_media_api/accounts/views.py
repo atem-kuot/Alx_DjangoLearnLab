@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework import generics, permissions, status
-from .serializers import RegisterSerializer, LoginSerializer, ProfileSerializer
+from .serializers import RegisterSerializer, UserSerializer
 from django.shortcuts import get_object_or_404
 from notifications.utils import create_notification
 
@@ -37,7 +37,7 @@ class RegisterView(generics.GenericAPIView):
 #  User Login
 class LoginView(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = LoginSerializer
+    serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -57,7 +57,7 @@ class LoginView(generics.GenericAPIView):
 #  Profile View (authenticated users only)
 class ProfileView(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = ProfileSerializer
+    serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
