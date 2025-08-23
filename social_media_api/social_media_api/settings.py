@@ -50,7 +50,7 @@ SECRET_KEY = 'django-insecure-!no#!@1x*&$nhe06bi2-*^*0!nly2!1(helg@yf1-6y-9q+szj
 
 ALLOWED_HOSTS = []
 
-
+PORT = int(os.environ.get("PORT", 8000))
 # Application definition
 
 INSTALLED_APPS = [
